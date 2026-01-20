@@ -215,6 +215,8 @@
 
     <div class="control-group">
       <button class="btn-export" onclick="exportData()">📥 导出数据</button>
+      <button class="btn-export" onclick="document.getElementById('csvFileInput').click()">📤 导入CSV</button>
+      <input type="file" id="csvFileInput" accept=".csv" style="display:none;" onchange="importCSV(event)">
     </div>
   </div>
 
@@ -564,6 +566,109 @@ function exportData() {
   link.href = URL.createObjectURL(blob);
   link.download = `周度数据_${new Date().toISOString().slice(0,10)}.csv`;
   link.click();
+}
+
+function importCSV(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const content = e.target.result;
+      const lines = content.split('\n').filter(line => line.trim());
+      
+      // 跳过表头
+      const dataLines = lines.slice(1);
+      
+      if (dataLines.length === 0) {
+        alert('❌ CSV文件为空或格式不正确');
+        return;
+      }
+
+      const importedData = [];
+      const errors = [];
+
+      dataLines.forEach((line, idx) => {
+        const parts = line.split(',').map(p => p.trim());
+        
+        if (parts.length < 7) {
+          errors.push(`第${idx + 2}行: 列数不足（需要7列）`);
+          return;
+        }
+
+        const [date, reg, app, succ, conv, succRate, platAvg] = parts;
+        
+        // 验证数据
+        if (!date) {
+          errors.push(`第${idx + 2}行: 日期为空`);
+          return;
+        }
+
+        const record = {
+          date: date,
+          registrations: parseFloat(reg) || 0,
+          applications: parseFloat(app) || 0,
+          successes: parseFloat(succ) || 0,
+          conversion_rate: parseFloat(conv) || 0,
+          success_rate: parseFloat(succRate) || 0,
+          platform_avg: parseFloat(platAvg) || 0
+        };
+
+        importedData.push(record);
+      });
+
+      if (errors.length > 0) {
+        const showErrors = errors.slice(0, 5).join('\n');
+        const more = errors.length > 5 ? `\n...还有${errors.length - 5}个错误` : '';
+        if (!confirm(`⚠️ 发现${errors.length}个错误:\n${showErrors}${more}\n\n是否继续导入有效数据？`)) {
+          return;
+        }
+      }
+
+      if (importedData.length === 0) {
+        alert('❌ 没有有效数据可导入');
+        return;
+      }
+
+      // 询问是否替换或合并
+      const action = confirm(
+        `📊 成功解析${importedData.length}条数据\n\n点击"确定"替换现有数据\n点击"取消"合并到现有数据`
+      );
+
+      if (action) {
+        // 替换模式
+        rawData = importedData;
+      } else {
+        // 合并模式：去重（同日期则更新）
+        importedData.forEach(newRecord => {
+          const existingIdx = rawData.findIndex(d => d.date === newRecord.date);
+          if (existingIdx >= 0) {
+            rawData[existingIdx] = newRecord;
+          } else {
+            rawData.push(newRecord);
+          }
+        });
+      }
+
+      rawData.sort((a, b) => a.date.localeCompare(b.date));
+      localStorage.setItem('weeklyMetrics', JSON.stringify(rawData));
+      applyRange();
+      
+      alert(`✅ 成功导入${importedData.length}条数据！`);
+    } catch (error) {
+      alert('❌ CSV解析失败: ' + error.message);
+    }
+  };
+
+  reader.onerror = function() {
+    alert('❌ 文件读取失败');
+  };
+
+  reader.readAsText(file, 'UTF-8');
+  
+  // 重置input，允许重复导入同一文件
+  event.target.value = '';
 }
 
 // 初始渲染
