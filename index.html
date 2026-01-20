@@ -228,21 +228,25 @@
       <tr>
         <th>日期/周次</th>
         <th>注册量</th>
-        <th>申请开户数</th>
         <th>开户成功数</th>
         <th>开户转化率(%)</th>
-        <th>开户成功率(%)</th>
-        <th>平台平均率(%)</th>
+        <th>入金数</th>
+        <th>入金率(%)</th>
+        <th>有效户数</th>
+        <th>有效户率(%)</th>
+        <th>创收</th>
         <th>操作</th>
       </tr>
       <tr>
-        <td><input type="text" id="date" placeholder="2026-01-01 或 第1周" style="width:120px;"></td>
+        <td><input type="text" id="date" placeholder="12月2日-12月8日" style="width:140px;"></td>
         <td><input type="number" id="registrations" min="0" style="width:80px;" oninput="autoCalculateRates()"></td>
-        <td><input type="number" id="applications" min="0" style="width:80px;" oninput="autoCalculateRates()"></td>
         <td><input type="number" id="successes" min="0" style="width:80px;" oninput="autoCalculateRates()"></td>
         <td><input type="number" id="conversion_rate" min="0" max="100" step="0.1" style="width:70px;"></td>
-        <td><input type="number" id="success_rate" min="0" max="100" step="0.1" style="width:70px;"></td>
-        <td><input type="number" id="platform_avg" min="0" max="100" step="0.1" style="width:70px;"></td>
+        <td><input type="number" id="deposits" min="0" style="width:80px;" oninput="autoCalculateRates()"></td>
+        <td><input type="number" id="deposit_rate" min="0" max="100" step="0.1" style="width:70px;"></td>
+        <td><input type="number" id="active_users" min="0" style="width:80px;" oninput="autoCalculateRates()"></td>
+        <td><input type="number" id="active_rate" min="0" max="100" step="0.1" style="width:70px;"></td>
+        <td><input type="number" id="revenue" min="0" style="width:90px;"></td>
         <td>
           <button class="btn-save" onclick="saveData()">💾 保存</button>
           <button class="btn-reset" onclick="resetForm()">🔄 清空</button>
@@ -250,7 +254,8 @@
       </tr>
     </table>
     <div style="margin-top:10px; color:#856404; font-size:12px;">
-      💡 提示: 输入注册量、申请开户数、开户成功数后，转化率会自动计算（也可手动修改）
+      💡 提示: 输入注册量、开户成功数后，开户转化率会自动计算<br>
+      💡 提示: 入金率 = 入金数÷开户成功数 × 100%，有效户率 = 有效户数÷开户成功数 × 100%
     </div>
   </div>
 
@@ -261,24 +266,13 @@
 <script>
 // ========== 数据与状态 ==========
 let rawData = JSON.parse(localStorage.getItem('weeklyMetrics')) || [
-  { date: '2026-01-01', registrations: 10, applications: 4, successes: 2, conversion_rate: 40, success_rate: 50, platform_avg: 65 },
-  { date: '2026-01-02', registrations: 18, applications: 6, successes: 3, conversion_rate: 33, success_rate: 50, platform_avg: 65 },
-  { date: '2026-01-04', registrations: 50, applications: 24, successes: 15, conversion_rate: 48, success_rate: 63, platform_avg: 58 },
-  { date: '2026-01-05', registrations: 65, applications: 42, successes: 32, conversion_rate: 65, success_rate: 76, platform_avg: 58 },
-  { date: '2026-01-07', registrations: 68, applications: 40, successes: 42, conversion_rate: 59, success_rate: 105, platform_avg: 59 },
-  { date: '2026-01-08', registrations: 70, applications: 36, successes: 35, conversion_rate: 51, success_rate: 97, platform_avg: 58 },
-  { date: '2026-01-09', registrations: 63, applications: 28, successes: 26, conversion_rate: 44, success_rate: 93, platform_avg: 78 },
-  { date: '2026-01-10', registrations: 50, applications: 34, successes: 30, conversion_rate: 68, success_rate: 88, platform_avg: 54 },
-  { date: '2026-01-11', registrations: 80, applications: 29, successes: 14, conversion_rate: 36, success_rate: 48, platform_avg: 54 },
-  { date: '2026-01-12', registrations: 120, applications: 76, successes: 66, conversion_rate: 63, success_rate: 87, platform_avg: 52 },
-  { date: '2026-01-13', registrations: 75, applications: 43, successes: 36, conversion_rate: 57, success_rate: 84, platform_avg: 53 },
-  { date: '2026-01-14', registrations: 70, applications: 53, successes: 50, conversion_rate: 76, success_rate: 94, platform_avg: 52 },
-  { date: '2026-01-15', registrations: 70, applications: 42, successes: 38, conversion_rate: 60, success_rate: 90, platform_avg: 52 },
-  { date: '2026-01-16', registrations: 52, applications: 23, successes: 20, conversion_rate: 44, success_rate: 87, platform_avg: 51 },
-  { date: '2026-01-17', registrations: 38, applications: 19, successes: 23, conversion_rate: 50, success_rate: 121, platform_avg: 51 },
-  { date: '2026-01-18', registrations: 28, applications: 13, successes: 10, conversion_rate: 46, success_rate: 77, platform_avg: 51 },
-  { date: '2026-01-20', registrations: 60, applications: 17, successes: 41, conversion_rate: 28, success_rate: 241, platform_avg: 68 },
-  { date: '2026-01-21', registrations: 10, applications: 7, successes: 7, conversion_rate: 70, success_rate: 100, platform_avg: 68 }
+  { date: '12月2日-12月8日', registrations: 1152, successes: 500, conversion_rate: 43.4, deposits: 300, deposit_rate: 60.0, active_users: 250, active_rate: 50.0, revenue: 15000 },
+  { date: '12月9日-12月15日', registrations: 1082, successes: 480, conversion_rate: 44.4, deposits: 280, deposit_rate: 58.3, active_users: 240, active_rate: 50.0, revenue: 14500 },
+  { date: '12月16日-12月22日', registrations: 1341, successes: 600, conversion_rate: 44.7, deposits: 350, deposit_rate: 58.3, active_users: 300, active_rate: 50.0, revenue: 18000 },
+  { date: '12月23日-12月29日', registrations: 2208, successes: 950, conversion_rate: 43.0, deposits: 550, deposit_rate: 57.9, active_users: 480, active_rate: 50.5, revenue: 28000 },
+  { date: '12月30日-1月5日', registrations: 1675, successes: 720, conversion_rate: 43.0, deposits: 420, deposit_rate: 58.3, active_users: 360, active_rate: 50.0, revenue: 21000 },
+  { date: '1月6日-1月12日', registrations: 3614, successes: 1550, conversion_rate: 42.9, deposits: 900, deposit_rate: 58.1, active_users: 780, active_rate: 50.3, revenue: 46500 },
+  { date: '1月13日-1月19日', registrations: 3063, successes: 1320, conversion_rate: 43.1, deposits: 770, deposit_rate: 58.3, active_users: 660, active_rate: 50.0, revenue: 39600 }
 ];
 
 let editingIndex = null;
@@ -313,17 +307,26 @@ function toggleAdmin() {
 
 function autoCalculateRates() {
   const reg = parseFloat(document.getElementById('registrations').value) || 0;
-  const app = parseFloat(document.getElementById('applications').value) || 0;
   const succ = parseFloat(document.getElementById('successes').value) || 0;
+  const dep = parseFloat(document.getElementById('deposits').value) || 0;
+  const active = parseFloat(document.getElementById('active_users').value) || 0;
   
-  if (reg > 0) {
-    const convRate = ((app / reg) * 100).toFixed(1);
+  // 开户转化率 = 开户成功数 ÷ 注册量
+  if (reg > 0 && succ > 0) {
+    const convRate = ((succ / reg) * 100).toFixed(1);
     document.getElementById('conversion_rate').value = convRate;
   }
   
-  if (app > 0) {
-    const succRate = ((succ / app) * 100).toFixed(1);
-    document.getElementById('success_rate').value = succRate;
+  // 入金率 = 入金数 ÷ 开户成功数
+  if (succ > 0 && dep > 0) {
+    const depRate = ((dep / succ) * 100).toFixed(1);
+    document.getElementById('deposit_rate').value = depRate;
+  }
+  
+  // 有效户率 = 有效户数 ÷ 开户成功数
+  if (succ > 0 && active > 0) {
+    const activeRate = ((active / succ) * 100).toFixed(1);
+    document.getElementById('active_rate').value = activeRate;
   }
 }
 
@@ -343,9 +346,9 @@ function renderChart() {
       axisPointer: { type: 'cross', crossStyle: { color: '#999' } }
     },
     legend: { 
-      data: ['注册量', '申请开户数', '开户成功数', '开户转化率', '开户成功率', '平台平均转化率'],
+      data: ['注册量', '开户成功数', '入金数', '有效户数', '开户转化率', '入金率', '有效户率'],
       top: 35,
-      textStyle: { fontSize: 12 }
+      textStyle: { fontSize: 11 }
     },
     grid: {
       left: '3%',
@@ -357,7 +360,7 @@ function renderChart() {
       type: 'category', 
       data: dates,
       axisPointer: { type: 'shadow' },
-      axisLabel: { rotate: 45, fontSize: 11 }
+      axisLabel: { rotate: 45, fontSize: 10 }
     },
     yAxis: [
       { 
@@ -372,7 +375,7 @@ function renderChart() {
         name: '比例(%)', 
         position: 'right',
         min: 0,
-        max: 120,
+        max: 100,
         axisLabel: { formatter: '{value}%' },
         splitLine: { show: false }
       }
@@ -384,52 +387,60 @@ function renderChart() {
         yAxisIndex: 0, 
         data: filteredData.map(d => d.registrations),
         itemStyle: { color: '#5B8FF9' },
-        barMaxWidth: 40
-      },
-      { 
-        name: '申请开户数', 
-        type: 'bar', 
-        yAxisIndex: 0, 
-        data: filteredData.map(d => d.applications),
-        itemStyle: { color: '#5AD8A6' },
-        barMaxWidth: 40
+        barMaxWidth: 30
       },
       { 
         name: '开户成功数', 
         type: 'bar', 
         yAxisIndex: 0, 
         data: filteredData.map(d => d.successes),
+        itemStyle: { color: '#5AD8A6' },
+        barMaxWidth: 30
+      },
+      { 
+        name: '入金数', 
+        type: 'bar', 
+        yAxisIndex: 0, 
+        data: filteredData.map(d => d.deposits),
+        itemStyle: { color: '#FF9D4E' },
+        barMaxWidth: 30
+      },
+      { 
+        name: '有效户数', 
+        type: 'bar', 
+        yAxisIndex: 0, 
+        data: filteredData.map(d => d.active_users),
         itemStyle: { color: '#FF6B6B' },
-        barMaxWidth: 40
+        barMaxWidth: 30
       },
       { 
         name: '开户转化率', 
         type: 'line', 
         yAxisIndex: 1, 
         data: filteredData.map(d => d.conversion_rate),
-        itemStyle: { color: '#FFD700' },
+        itemStyle: { color: '#1890FF' },
         lineStyle: { width: 3 },
         symbol: 'circle',
         symbolSize: 8
       },
       { 
-        name: '开户成功率', 
+        name: '入金率', 
         type: 'line', 
         yAxisIndex: 1, 
-        data: filteredData.map(d => d.success_rate),
-        itemStyle: { color: '#FFA940' },
+        data: filteredData.map(d => d.deposit_rate),
+        itemStyle: { color: '#9254DE' },
         lineStyle: { width: 3 },
         symbol: 'diamond',
         symbolSize: 8
       },
       { 
-        name: '平台平均转化率', 
+        name: '有效户率', 
         type: 'line', 
         yAxisIndex: 1, 
-        data: filteredData.map(d => d.platform_avg),
-        itemStyle: { color: '#1890FF' },
+        data: filteredData.map(d => d.active_rate),
+        itemStyle: { color: '#F759AB' },
         lineStyle: { width: 3 },
-        symbol: 'circle',
+        symbol: 'triangle',
         symbolSize: 8
       }
     ]
@@ -442,8 +453,8 @@ function renderTable() {
   const table = document.getElementById('dataTable');
   table.innerHTML = `
     <tr>
-      <th>日期/周次</th><th>注册量</th><th>申请开户数</th><th>开户成功数</th>
-      <th>开户转化率</th><th>开户成功率</th><th>平台平均率</th><th>操作</th>
+      <th>日期/周次</th><th>注册量</th><th>开户成功数</th><th>开户转化率</th>
+      <th>入金数</th><th>入金率</th><th>有效户数</th><th>有效户率</th><th>创收</th><th>操作</th>
     </tr>`;
 
   rawData.forEach((d, i) => {
@@ -451,11 +462,13 @@ function renderTable() {
     row.innerHTML = `
       <td style="font-weight:500;">${d.date}</td>
       <td>${d.registrations}</td>
-      <td>${d.applications}</td>
       <td>${d.successes}</td>
       <td>${d.conversion_rate}%</td>
-      <td>${d.success_rate}%</td>
-      <td>${d.platform_avg}%</td>
+      <td>${d.deposits}</td>
+      <td>${d.deposit_rate}%</td>
+      <td>${d.active_users}</td>
+      <td>${d.active_rate}%</td>
+      <td>${d.revenue ? d.revenue.toLocaleString() : 0}</td>
       <td>
         <button class="btn-edit" onclick="editData(${i})">✏️ 编辑</button>
         <button class="btn-delete" onclick="deleteData(${i})">🗑️ 删除</button>
@@ -469,11 +482,13 @@ function saveData() {
 
   const date = document.getElementById('date').value.trim();
   const registrations = parseFloat(document.getElementById('registrations').value) || 0;
-  const applications = parseFloat(document.getElementById('applications').value) || 0;
   const successes = parseFloat(document.getElementById('successes').value) || 0;
   const conversion_rate = parseFloat(document.getElementById('conversion_rate').value) || 0;
-  const success_rate = parseFloat(document.getElementById('success_rate').value) || 0;
-  const platform_avg = parseFloat(document.getElementById('platform_avg').value) || 0;
+  const deposits = parseFloat(document.getElementById('deposits').value) || 0;
+  const deposit_rate = parseFloat(document.getElementById('deposit_rate').value) || 0;
+  const active_users = parseFloat(document.getElementById('active_users').value) || 0;
+  const active_rate = parseFloat(document.getElementById('active_rate').value) || 0;
+  const revenue = parseFloat(document.getElementById('revenue').value) || 0;
 
   if (!date) return alert('❌ 日期不能为空');
 
@@ -481,7 +496,7 @@ function saveData() {
     return alert('❌ 该日期已存在数据，请使用编辑功能');
   }
 
-  const record = { date, registrations, applications, successes, conversion_rate, success_rate, platform_avg };
+  const record = { date, registrations, successes, conversion_rate, deposits, deposit_rate, active_users, active_rate, revenue };
 
   if (editingIndex !== null) {
     rawData[editingIndex] = record;
@@ -503,11 +518,13 @@ function editData(i) {
   editingIndex = i;
   document.getElementById('date').value = d.date;
   document.getElementById('registrations').value = d.registrations;
-  document.getElementById('applications').value = d.applications;
   document.getElementById('successes').value = d.successes;
   document.getElementById('conversion_rate').value = d.conversion_rate;
-  document.getElementById('success_rate').value = d.success_rate;
-  document.getElementById('platform_avg').value = d.platform_avg;
+  document.getElementById('deposits').value = d.deposits;
+  document.getElementById('deposit_rate').value = d.deposit_rate;
+  document.getElementById('active_users').value = d.active_users;
+  document.getElementById('active_rate').value = d.active_rate;
+  document.getElementById('revenue').value = d.revenue;
   
   // 滚动到表单
   document.getElementById('adminPanel').scrollIntoView({ behavior: 'smooth' });
@@ -525,11 +542,13 @@ function deleteData(i) {
 function resetForm() {
   document.getElementById('date').value = '';
   document.getElementById('registrations').value = '';
-  document.getElementById('applications').value = '';
   document.getElementById('successes').value = '';
   document.getElementById('conversion_rate').value = '';
-  document.getElementById('success_rate').value = '';
-  document.getElementById('platform_avg').value = '';
+  document.getElementById('deposits').value = '';
+  document.getElementById('deposit_rate').value = '';
+  document.getElementById('active_users').value = '';
+  document.getElementById('active_rate').value = '';
+  document.getElementById('revenue').value = '';
   editingIndex = null;
 }
 
@@ -557,8 +576,8 @@ function applyRange() {
 
 function exportData() {
   const csv = [
-    ['日期/周次', '注册量', '申请开户数', '开户成功数', '开户转化率(%)', '开户成功率(%)', '平台平均率(%)'],
-    ...rawData.map(d => [d.date, d.registrations, d.applications, d.successes, d.conversion_rate, d.success_rate, d.platform_avg])
+    ['日期/周次', '注册量', '开户成功数', '开户转化率(%)', '入金数', '入金率(%)', '有效户数', '有效户率(%)', '创收'],
+    ...rawData.map(d => [d.date, d.registrations, d.successes, d.conversion_rate, d.deposits, d.deposit_rate, d.active_users, d.active_rate, d.revenue])
   ].map(row => row.join(',')).join('\n');
   
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -592,12 +611,12 @@ function importCSV(event) {
       dataLines.forEach((line, idx) => {
         const parts = line.split(',').map(p => p.trim());
         
-        if (parts.length < 7) {
-          errors.push(`第${idx + 2}行: 列数不足（需要7列）`);
+        if (parts.length < 9) {
+          errors.push(`第${idx + 2}行: 列数不足（需要9列）`);
           return;
         }
 
-        const [date, reg, app, succ, conv, succRate, platAvg] = parts;
+        const [date, reg, succ, conv, dep, depRate, active, activeRate, rev] = parts;
         
         // 验证数据
         if (!date) {
@@ -608,11 +627,13 @@ function importCSV(event) {
         const record = {
           date: date,
           registrations: parseFloat(reg) || 0,
-          applications: parseFloat(app) || 0,
           successes: parseFloat(succ) || 0,
           conversion_rate: parseFloat(conv) || 0,
-          success_rate: parseFloat(succRate) || 0,
-          platform_avg: parseFloat(platAvg) || 0
+          deposits: parseFloat(dep) || 0,
+          deposit_rate: parseFloat(depRate) || 0,
+          active_users: parseFloat(active) || 0,
+          active_rate: parseFloat(activeRate) || 0,
+          revenue: parseFloat(rev) || 0
         };
 
         importedData.push(record);
