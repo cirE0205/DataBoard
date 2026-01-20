@@ -241,11 +241,11 @@
         <td><input type="text" id="date" placeholder="12月2日-12月8日" style="width:140px;"></td>
         <td><input type="number" id="registrations" min="0" style="width:80px;" oninput="autoCalculateRates()"></td>
         <td><input type="number" id="successes" min="0" style="width:80px;" oninput="autoCalculateRates()"></td>
-        <td><input type="number" id="conversion_rate" min="0" max="100" step="0.1" style="width:70px;"></td>
+        <td><input type="number" id="conversion_rate" min="0" max="100" step="0.01" style="width:70px;"></td>
         <td><input type="number" id="deposits" min="0" style="width:80px;" oninput="autoCalculateRates()"></td>
-        <td><input type="number" id="deposit_rate" min="0" max="100" step="0.1" style="width:70px;"></td>
+        <td><input type="number" id="deposit_rate" min="0" max="100" step="0.01" style="width:70px;"></td>
         <td><input type="number" id="active_users" min="0" style="width:80px;" oninput="autoCalculateRates()"></td>
-        <td><input type="number" id="active_rate" min="0" max="100" step="0.1" style="width:70px;"></td>
+        <td><input type="number" id="active_rate" min="0" max="100" step="0.01" style="width:70px;"></td>
         <td><input type="number" id="revenue" min="0" style="width:90px;"></td>
         <td>
           <button class="btn-save" onclick="saveData()">💾 保存</button>
@@ -254,7 +254,7 @@
       </tr>
     </table>
     <div style="margin-top:10px; color:#856404; font-size:12px;">
-      💡 提示: 输入注册量、开户成功数后，开户转化率会自动计算<br>
+      💡 提示: 输入注册量、开户成功数后，开户转化率会自动计算（保留2位小数）<br>
       💡 提示: 入金率 = 入金数÷开户成功数 × 100%，有效户率 = 有效户数÷开户成功数 × 100%
     </div>
   </div>
@@ -264,6 +264,30 @@
 </div>
 
 <script>
+// ========== 日期解析和排序 ==========
+function parseChineseDate(dateStr) {
+  // 解析中文日期格式: "11月4日-11月10日" 或 "12月30日-1月5日"
+  const match = dateStr.match(/(\d+)月(\d+)日/);
+  if (!match) return 0;
+  
+  const month = parseInt(match[1]);
+  const day = parseInt(match[2]);
+  
+  // 假设跨年的情况：1-3月视为下一年，其他月份为当年
+  // 这样 11月 < 12月 < 1月 < 2月 < 3月
+  let sortYear = 2025;
+  if (month >= 1 && month <= 3) {
+    sortYear = 2026; // 1-3月视为2026年
+  }
+  
+  // 返回可排序的时间戳
+  return new Date(sortYear, month - 1, day).getTime();
+}
+
+function sortDataByDate(data) {
+  return data.sort((a, b) => parseChineseDate(a.date) - parseChineseDate(b.date));
+}
+
 // ========== 数据迁移和修复 ==========
 function migrateAndFixData() {
   let data = JSON.parse(localStorage.getItem('weeklyMetrics')) || [];
@@ -289,10 +313,10 @@ function migrateAndFixData() {
     const dep = parseFloat(record.deposits) || 0;
     const active = parseFloat(record.active_users) || 0;
     
-    // 重新计算转化率
-    const newConvRate = reg > 0 ? parseFloat(((succ / reg) * 100).toFixed(1)) : 0;
-    const newDepRate = succ > 0 ? parseFloat(((dep / succ) * 100).toFixed(1)) : 0;
-    const newActiveRate = succ > 0 ? parseFloat(((active / succ) * 100).toFixed(1)) : 0;
+    // 重新计算转化率 (保留2位小数)
+    const newConvRate = reg > 0 ? parseFloat(((succ / reg) * 100).toFixed(2)) : 0;
+    const newDepRate = succ > 0 ? parseFloat(((dep / succ) * 100).toFixed(2)) : 0;
+    const newActiveRate = succ > 0 ? parseFloat(((active / succ) * 100).toFixed(2)) : 0;
     
     // 如果发现数据不对，标记需要修复
     if (record.conversion_rate === 0 || record.deposit_rate === 0 || record.active_rate === 0) {
@@ -318,7 +342,8 @@ function migrateAndFixData() {
     console.log('✅ 数据已自动修复：重新计算了所有转化率');
   }
   
-  return data;
+  // 确保数据按日期排序
+  return sortDataByDate(data);
 }
 
 // ========== 数据与状态 ==========
@@ -360,21 +385,21 @@ function autoCalculateRates() {
   const dep = parseFloat(document.getElementById('deposits').value) || 0;
   const active = parseFloat(document.getElementById('active_users').value) || 0;
   
-  // 开户转化率 = 开户成功数 ÷ 注册量
+  // 开户转化率 = 开户成功数 ÷ 注册量 (保留2位小数)
   if (reg > 0 && succ > 0) {
-    const convRate = ((succ / reg) * 100).toFixed(1);
+    const convRate = ((succ / reg) * 100).toFixed(2);
     document.getElementById('conversion_rate').value = convRate;
   }
   
-  // 入金率 = 入金数 ÷ 开户成功数
+  // 入金率 = 入金数 ÷ 开户成功数 (保留2位小数)
   if (succ > 0 && dep > 0) {
-    const depRate = ((dep / succ) * 100).toFixed(1);
+    const depRate = ((dep / succ) * 100).toFixed(2);
     document.getElementById('deposit_rate').value = depRate;
   }
   
-  // 有效户率 = 有效户数 ÷ 开户成功数
+  // 有效户率 = 有效户数 ÷ 开户成功数 (保留2位小数)
   if (succ > 0 && active > 0) {
-    const activeRate = ((active / succ) * 100).toFixed(1);
+    const activeRate = ((active / succ) * 100).toFixed(2);
     document.getElementById('active_rate').value = activeRate;
   }
 }
@@ -554,7 +579,7 @@ function saveData() {
     rawData.push(record);
   }
 
-  rawData.sort((a, b) => a.date.localeCompare(b.date));
+  sortDataByDate(rawData);
   localStorage.setItem('weeklyMetrics', JSON.stringify(rawData));
   applyRange();
   resetForm();
@@ -684,15 +709,15 @@ function importCSV(event) {
         let depRateNum = parseFloat(depRate) || 0;
         let activeRateNum = parseFloat(activeRate) || 0;
         
-        // 如果百分比为空（CSV中为空格或0），自动计算
+        // 如果百分比为空（CSV中为空格或0），自动计算 (保留2位小数)
         if (convRate === 0 && regNum > 0 && succNum > 0) {
-          convRate = parseFloat(((succNum / regNum) * 100).toFixed(1));
+          convRate = parseFloat(((succNum / regNum) * 100).toFixed(2));
         }
         if (depRateNum === 0 && succNum > 0 && depNum > 0) {
-          depRateNum = parseFloat(((depNum / succNum) * 100).toFixed(1));
+          depRateNum = parseFloat(((depNum / succNum) * 100).toFixed(2));
         }
         if (activeRateNum === 0 && succNum > 0 && activeNum > 0) {
-          activeRateNum = parseFloat(((activeNum / succNum) * 100).toFixed(1));
+          activeRateNum = parseFloat(((activeNum / succNum) * 100).toFixed(2));
         }
 
         const record = {
@@ -743,7 +768,7 @@ function importCSV(event) {
         });
       }
 
-      rawData.sort((a, b) => a.date.localeCompare(b.date));
+      sortDataByDate(rawData);
       localStorage.setItem('weeklyMetrics', JSON.stringify(rawData));
       applyRange();
       
