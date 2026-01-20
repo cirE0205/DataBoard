@@ -232,6 +232,7 @@
         <th>开户转化率(%)</th>
         <th>入金数</th>
         <th>入金率(%)</th>
+        <th>入金资产</th>
         <th>有效户数</th>
         <th>有效户率(%)</th>
         <th>创收</th>
@@ -244,6 +245,7 @@
         <td><input type="number" id="conversion_rate" min="0" max="100" step="0.01" style="width:70px;"></td>
         <td><input type="number" id="deposits" min="0" style="width:80px;" oninput="autoCalculateRates()"></td>
         <td><input type="number" id="deposit_rate" min="0" max="100" step="0.01" style="width:70px;"></td>
+        <td><input type="number" id="deposit_assets" min="0" style="width:90px;"></td>
         <td><input type="number" id="active_users" min="0" style="width:80px;" oninput="autoCalculateRates()"></td>
         <td><input type="number" id="active_rate" min="0" max="100" step="0.01" style="width:70px;"></td>
         <td><input type="number" id="revenue" min="0" style="width:90px;"></td>
@@ -271,13 +273,13 @@ function migrateAndFixData() {
   // 如果没有数据，使用默认示例数据
   if (data.length === 0) {
     return [
-      { date: '12月2日-12月8日', registrations: 1152, successes: 500, conversion_rate: 43.4, deposits: 300, deposit_rate: 60.0, active_users: 250, active_rate: 50.0, revenue: 15000 },
-      { date: '12月9日-12月15日', registrations: 1082, successes: 480, conversion_rate: 44.4, deposits: 280, deposit_rate: 58.3, active_users: 240, active_rate: 50.0, revenue: 14500 },
-      { date: '12月16日-12月22日', registrations: 1341, successes: 600, conversion_rate: 44.7, deposits: 350, deposit_rate: 58.3, active_users: 300, active_rate: 50.0, revenue: 18000 },
-      { date: '12月23日-12月29日', registrations: 2208, successes: 950, conversion_rate: 43.0, deposits: 550, deposit_rate: 57.9, active_users: 480, active_rate: 50.5, revenue: 28000 },
-      { date: '12月30日-1月5日', registrations: 1675, successes: 720, conversion_rate: 43.0, deposits: 420, deposit_rate: 58.3, active_users: 360, active_rate: 50.0, revenue: 21000 },
-      { date: '1月6日-1月12日', registrations: 3614, successes: 1550, conversion_rate: 42.9, deposits: 900, deposit_rate: 58.1, active_users: 780, active_rate: 50.3, revenue: 46500 },
-      { date: '1月13日-1月19日', registrations: 3063, successes: 1320, conversion_rate: 43.1, deposits: 770, deposit_rate: 58.3, active_users: 660, active_rate: 50.0, revenue: 39600 }
+      { date: '12月2日-12月8日', registrations: 1152, successes: 500, conversion_rate: 43.4, deposits: 300, deposit_rate: 60.0, deposit_assets: 0, active_users: 250, active_rate: 50.0, revenue: 15000 },
+      { date: '12月9日-12月15日', registrations: 1082, successes: 480, conversion_rate: 44.4, deposits: 280, deposit_rate: 58.3, deposit_assets: 0, active_users: 240, active_rate: 50.0, revenue: 14500 },
+      { date: '12月16日-12月22日', registrations: 1341, successes: 600, conversion_rate: 44.7, deposits: 350, deposit_rate: 58.3, deposit_assets: 0, active_users: 300, active_rate: 50.0, revenue: 18000 },
+      { date: '12月23日-12月29日', registrations: 2208, successes: 950, conversion_rate: 43.0, deposits: 550, deposit_rate: 57.9, deposit_assets: 0, active_users: 480, active_rate: 50.5, revenue: 28000 },
+      { date: '12月30日-1月5日', registrations: 1675, successes: 720, conversion_rate: 43.0, deposits: 420, deposit_rate: 58.3, deposit_assets: 0, active_users: 360, active_rate: 50.0, revenue: 21000 },
+      { date: '1月6日-1月12日', registrations: 3614, successes: 1550, conversion_rate: 42.9, deposits: 900, deposit_rate: 58.1, deposit_assets: 0, active_users: 780, active_rate: 50.3, revenue: 46500 },
+      { date: '1月13日-1月19日', registrations: 3063, successes: 1320, conversion_rate: 43.1, deposits: 770, deposit_rate: 58.3, deposit_assets: 0, active_users: 660, active_rate: 50.0, revenue: 39600 }
     ];
   }
   
@@ -306,6 +308,7 @@ function migrateAndFixData() {
       conversion_rate: newConvRate,
       deposits: dep,
       deposit_rate: newDepRate,
+      deposit_assets: parseFloat(record.deposit_assets) || 0,
       active_users: active,
       active_rate: newActiveRate,
       revenue: parseFloat(record.revenue) || 0
@@ -396,9 +399,9 @@ function renderChart() {
       axisPointer: { type: 'cross', crossStyle: { color: '#999' } }
     },
     legend: { 
-      data: ['注册量', '开户成功数', '入金数', '有效户数', '创收', '开户转化率', '入金率', '有效户率'],
+      data: ['注册量', '开户成功数', '入金数', '入金资产', '有效户数', '创收', '开户转化率', '入金率', '有效户率'],
       top: 35,
-      textStyle: { fontSize: 10 }
+      textStyle: { fontSize: 9 }
     },
     grid: {
       left: '3%',
@@ -415,7 +418,7 @@ function renderChart() {
     yAxis: [
       { 
         type: 'value', 
-        name: '数量(个) / 创收', 
+        name: '数量(个) / 创收 / 入金资产', 
         position: 'left',
         axisLabel: { formatter: '{value}' },
         splitLine: { lineStyle: { type: 'dashed', opacity: 0.3 } }
@@ -454,6 +457,16 @@ function renderChart() {
         data: filteredData.map(d => d.deposits),
         itemStyle: { color: '#FF9D4E' },
         barMaxWidth: 30
+      },
+      { 
+        name: '入金资产', 
+        type: 'line', 
+        yAxisIndex: 0, 
+        data: filteredData.map(d => d.deposit_assets),
+        itemStyle: { color: '#FF85C0' },
+        lineStyle: { width: 3, type: 'solid' },
+        symbol: 'diamond',
+        symbolSize: 8
       },
       { 
         name: '有效户数', 
@@ -514,7 +527,7 @@ function renderTable() {
   table.innerHTML = `
     <tr>
       <th>日期/周次</th><th>注册量</th><th>开户成功数</th><th>开户转化率</th>
-      <th>入金数</th><th>入金率</th><th>有效户数</th><th>有效户率</th><th>创收</th><th>操作</th>
+      <th>入金数</th><th>入金率</th><th>入金资产</th><th>有效户数</th><th>有效户率</th><th>创收</th><th>操作</th>
     </tr>`;
 
   rawData.forEach((d, i) => {
@@ -526,6 +539,7 @@ function renderTable() {
       <td>${d.conversion_rate}%</td>
       <td>${d.deposits}</td>
       <td>${d.deposit_rate}%</td>
+      <td>${d.deposit_assets ? d.deposit_assets.toLocaleString() : 0}</td>
       <td>${d.active_users}</td>
       <td>${d.active_rate}%</td>
       <td>${d.revenue ? d.revenue.toLocaleString() : 0}</td>
@@ -546,6 +560,7 @@ function saveData() {
   const conversion_rate = parseFloat(document.getElementById('conversion_rate').value) || 0;
   const deposits = parseFloat(document.getElementById('deposits').value) || 0;
   const deposit_rate = parseFloat(document.getElementById('deposit_rate').value) || 0;
+  const deposit_assets = parseFloat(document.getElementById('deposit_assets').value) || 0;
   const active_users = parseFloat(document.getElementById('active_users').value) || 0;
   const active_rate = parseFloat(document.getElementById('active_rate').value) || 0;
   const revenue = parseFloat(document.getElementById('revenue').value) || 0;
@@ -556,7 +571,7 @@ function saveData() {
     return alert('❌ 该日期已存在数据，请使用编辑功能');
   }
 
-  const record = { date, registrations, successes, conversion_rate, deposits, deposit_rate, active_users, active_rate, revenue };
+  const record = { date, registrations, successes, conversion_rate, deposits, deposit_rate, deposit_assets, active_users, active_rate, revenue };
 
   if (editingIndex !== null) {
     rawData[editingIndex] = record;
@@ -582,6 +597,7 @@ function editData(i) {
   document.getElementById('conversion_rate').value = d.conversion_rate;
   document.getElementById('deposits').value = d.deposits;
   document.getElementById('deposit_rate').value = d.deposit_rate;
+  document.getElementById('deposit_assets').value = d.deposit_assets || 0;
   document.getElementById('active_users').value = d.active_users;
   document.getElementById('active_rate').value = d.active_rate;
   document.getElementById('revenue').value = d.revenue;
@@ -606,6 +622,7 @@ function resetForm() {
   document.getElementById('conversion_rate').value = '';
   document.getElementById('deposits').value = '';
   document.getElementById('deposit_rate').value = '';
+  document.getElementById('deposit_assets').value = '';
   document.getElementById('active_users').value = '';
   document.getElementById('active_rate').value = '';
   document.getElementById('revenue').value = '';
@@ -636,8 +653,8 @@ function applyRange() {
 
 function exportData() {
   const csv = [
-    ['日期/周次', '注册量', '开户成功数', '开户转化率(%)', '入金数', '入金率(%)', '有效户数', '有效户率(%)', '创收'],
-    ...rawData.map(d => [d.date, d.registrations, d.successes, d.conversion_rate, d.deposits, d.deposit_rate, d.active_users, d.active_rate, d.revenue])
+    ['日期/周次', '注册量', '开户成功数', '开户转化率(%)', '入金数', '入金率(%)', '入金资产', '有效户数', '有效户率(%)', '创收'],
+    ...rawData.map(d => [d.date, d.registrations, d.successes, d.conversion_rate, d.deposits, d.deposit_rate, d.deposit_assets || 0, d.active_users, d.active_rate, d.revenue])
   ].map(row => row.join(',')).join('\n');
   
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -671,12 +688,12 @@ function importCSV(event) {
       dataLines.forEach((line, idx) => {
         const parts = line.split(',').map(p => p.trim());
         
-        if (parts.length < 9) {
-          errors.push(`第${idx + 2}行: 列数不足（需要9列）`);
+        if (parts.length < 10) {
+          errors.push(`第${idx + 2}行: 列数不足（需要10列）`);
           return;
         }
 
-        const [date, reg, succ, conv, dep, depRate, active, activeRate, rev] = parts;
+        const [date, reg, succ, conv, dep, depRate, depAssets, active, activeRate, rev] = parts;
         
         // 验证数据
         if (!date) {
@@ -713,6 +730,7 @@ function importCSV(event) {
           conversion_rate: convRate,
           deposits: depNum,
           deposit_rate: depRateNum,
+          deposit_assets: parseFloat(depAssets) || 0,
           active_users: activeNum,
           active_rate: activeRateNum,
           revenue: parseFloat(rev) || 0
