@@ -264,30 +264,6 @@
 </div>
 
 <script>
-// ========== 日期解析和排序 ==========
-function parseChineseDate(dateStr) {
-  // 解析中文日期格式: "11月4日-11月10日" 或 "12月30日-1月5日"
-  const match = dateStr.match(/(\d+)月(\d+)日/);
-  if (!match) return 0;
-  
-  const month = parseInt(match[1]);
-  const day = parseInt(match[2]);
-  
-  // 假设跨年的情况：1-3月视为下一年，其他月份为当年
-  // 这样 11月 < 12月 < 1月 < 2月 < 3月
-  let sortYear = 2025;
-  if (month >= 1 && month <= 3) {
-    sortYear = 2026; // 1-3月视为2026年
-  }
-  
-  // 返回可排序的时间戳
-  return new Date(sortYear, month - 1, day).getTime();
-}
-
-function sortDataByDate(data) {
-  return data.sort((a, b) => parseChineseDate(a.date) - parseChineseDate(b.date));
-}
-
 // ========== 数据迁移和修复 ==========
 function migrateAndFixData() {
   let data = JSON.parse(localStorage.getItem('weeklyMetrics')) || [];
@@ -342,8 +318,8 @@ function migrateAndFixData() {
     console.log('✅ 数据已自动修复：重新计算了所有转化率');
   }
   
-  // 确保数据按日期排序
-  return sortDataByDate(data);
+  // 保持原始顺序（不排序）
+  return data;
 }
 
 // ========== 数据与状态 ==========
@@ -579,7 +555,7 @@ function saveData() {
     rawData.push(record);
   }
 
-  sortDataByDate(rawData);
+  // 不排序，保持用户输入顺序
   localStorage.setItem('weeklyMetrics', JSON.stringify(rawData));
   applyRange();
   resetForm();
@@ -768,7 +744,7 @@ function importCSV(event) {
         });
       }
 
-      sortDataByDate(rawData);
+      // 不排序，保持CSV文件原始顺序
       localStorage.setItem('weeklyMetrics', JSON.stringify(rawData));
       applyRange();
       
