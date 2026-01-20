@@ -232,9 +232,9 @@
         <th>开户转化率(%)</th>
         <th>入金数</th>
         <th>入金率(%)</th>
-        <th>入金资产</th>
         <th>有效户数</th>
         <th>有效户率(%)</th>
+        <th>入金资产</th>
         <th>创收</th>
         <th>操作</th>
       </tr>
@@ -245,9 +245,9 @@
         <td><input type="number" id="conversion_rate" min="0" max="100" step="0.01" style="width:70px;"></td>
         <td><input type="number" id="deposits" min="0" style="width:80px;" oninput="autoCalculateRates()"></td>
         <td><input type="number" id="deposit_rate" min="0" max="100" step="0.01" style="width:70px;"></td>
-        <td><input type="number" id="deposit_assets" min="0" style="width:90px;"></td>
         <td><input type="number" id="active_users" min="0" style="width:80px;" oninput="autoCalculateRates()"></td>
         <td><input type="number" id="active_rate" min="0" max="100" step="0.01" style="width:70px;"></td>
+        <td><input type="number" id="deposit_assets" min="0" style="width:90px;"></td>
         <td><input type="number" id="revenue" min="0" style="width:90px;"></td>
         <td>
           <button class="btn-save" onclick="saveData()">💾 保存</button>
@@ -527,7 +527,7 @@ function renderTable() {
   table.innerHTML = `
     <tr>
       <th>日期/周次</th><th>注册量</th><th>开户成功数</th><th>开户转化率</th>
-      <th>入金数</th><th>入金率</th><th>入金资产</th><th>有效户数</th><th>有效户率</th><th>创收</th><th>操作</th>
+      <th>入金数</th><th>入金率</th><th>有效户数</th><th>有效户率</th><th>入金资产</th><th>创收</th><th>操作</th>
     </tr>`;
 
   rawData.forEach((d, i) => {
@@ -539,9 +539,9 @@ function renderTable() {
       <td>${d.conversion_rate}%</td>
       <td>${d.deposits}</td>
       <td>${d.deposit_rate}%</td>
-      <td>${d.deposit_assets ? d.deposit_assets.toLocaleString() : 0}</td>
       <td>${d.active_users}</td>
       <td>${d.active_rate}%</td>
+      <td>${d.deposit_assets ? d.deposit_assets.toLocaleString() : 0}</td>
       <td>${d.revenue ? d.revenue.toLocaleString() : 0}</td>
       <td>
         <button class="btn-edit" onclick="editData(${i})">✏️ 编辑</button>
@@ -597,9 +597,9 @@ function editData(i) {
   document.getElementById('conversion_rate').value = d.conversion_rate;
   document.getElementById('deposits').value = d.deposits;
   document.getElementById('deposit_rate').value = d.deposit_rate;
-  document.getElementById('deposit_assets').value = d.deposit_assets || 0;
   document.getElementById('active_users').value = d.active_users;
   document.getElementById('active_rate').value = d.active_rate;
+  document.getElementById('deposit_assets').value = d.deposit_assets || 0;
   document.getElementById('revenue').value = d.revenue;
   
   // 滚动到表单
@@ -622,9 +622,9 @@ function resetForm() {
   document.getElementById('conversion_rate').value = '';
   document.getElementById('deposits').value = '';
   document.getElementById('deposit_rate').value = '';
-  document.getElementById('deposit_assets').value = '';
   document.getElementById('active_users').value = '';
   document.getElementById('active_rate').value = '';
+  document.getElementById('deposit_assets').value = '';
   document.getElementById('revenue').value = '';
   editingIndex = null;
 }
@@ -653,8 +653,8 @@ function applyRange() {
 
 function exportData() {
   const csv = [
-    ['日期/周次', '注册量', '开户成功数', '开户转化率(%)', '入金数', '入金率(%)', '入金资产', '有效户数', '有效户率(%)', '创收'],
-    ...rawData.map(d => [d.date, d.registrations, d.successes, d.conversion_rate, d.deposits, d.deposit_rate, d.deposit_assets || 0, d.active_users, d.active_rate, d.revenue])
+    ['日期/周次', '注册量', '开户成功数', '开户转化率(%)', '入金数', '入金率(%)', '有效户数', '有效户率(%)', '入金资产', '创收'],
+    ...rawData.map(d => [d.date, d.registrations, d.successes, d.conversion_rate, d.deposits, d.deposit_rate, d.active_users, d.active_rate, d.deposit_assets || 0, d.revenue])
   ].map(row => row.join(',')).join('\n');
   
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -693,7 +693,7 @@ function importCSV(event) {
           return;
         }
 
-        const [date, reg, succ, conv, dep, depRate, depAssets, active, activeRate, rev] = parts;
+        const [date, reg, succ, conv, dep, depRate, active, activeRate, depAssets, rev] = parts;
         
         // 验证数据
         if (!date) {
