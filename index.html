@@ -396,9 +396,9 @@ function renderChart() {
       axisPointer: { type: 'cross', crossStyle: { color: '#999' } }
     },
     legend: { 
-      data: ['注册量', '开户成功数', '入金数', '有效户数', '开户转化率', '入金率', '有效户率'],
+      data: ['注册量', '开户成功数', '入金数', '有效户数', '创收', '开户转化率', '入金率', '有效户率'],
       top: 35,
-      textStyle: { fontSize: 11 }
+      textStyle: { fontSize: 10 }
     },
     grid: {
       left: '3%',
@@ -415,7 +415,7 @@ function renderChart() {
     yAxis: [
       { 
         type: 'value', 
-        name: '数量(个)', 
+        name: '数量(个) / 创收', 
         position: 'left',
         axisLabel: { formatter: '{value}' },
         splitLine: { lineStyle: { type: 'dashed', opacity: 0.3 } }
@@ -462,6 +462,16 @@ function renderChart() {
         data: filteredData.map(d => d.active_users),
         itemStyle: { color: '#FF6B6B' },
         barMaxWidth: 30
+      },
+      { 
+        name: '创收', 
+        type: 'line', 
+        yAxisIndex: 0, 
+        data: filteredData.map(d => d.revenue),
+        itemStyle: { color: '#13C2C2' },
+        lineStyle: { width: 3, type: 'dashed' },
+        symbol: 'rect',
+        symbolSize: 8
       },
       { 
         name: '开户转化率', 
