@@ -673,15 +673,37 @@ function importCSV(event) {
           return;
         }
 
+        // 解析基础数据
+        const regNum = parseFloat(reg) || 0;
+        const succNum = parseFloat(succ) || 0;
+        const depNum = parseFloat(dep) || 0;
+        const activeNum = parseFloat(active) || 0;
+        
+        // 智能计算：如果CSV中百分比为空或0，则自动计算
+        let convRate = parseFloat(conv) || 0;
+        let depRateNum = parseFloat(depRate) || 0;
+        let activeRateNum = parseFloat(activeRate) || 0;
+        
+        // 如果百分比为空（CSV中为空格或0），自动计算
+        if (convRate === 0 && regNum > 0 && succNum > 0) {
+          convRate = parseFloat(((succNum / regNum) * 100).toFixed(1));
+        }
+        if (depRateNum === 0 && succNum > 0 && depNum > 0) {
+          depRateNum = parseFloat(((depNum / succNum) * 100).toFixed(1));
+        }
+        if (activeRateNum === 0 && succNum > 0 && activeNum > 0) {
+          activeRateNum = parseFloat(((activeNum / succNum) * 100).toFixed(1));
+        }
+
         const record = {
           date: date,
-          registrations: parseFloat(reg) || 0,
-          successes: parseFloat(succ) || 0,
-          conversion_rate: parseFloat(conv) || 0,
-          deposits: parseFloat(dep) || 0,
-          deposit_rate: parseFloat(depRate) || 0,
-          active_users: parseFloat(active) || 0,
-          active_rate: parseFloat(activeRate) || 0,
+          registrations: regNum,
+          successes: succNum,
+          conversion_rate: convRate,
+          deposits: depNum,
+          deposit_rate: depRateNum,
+          active_users: activeNum,
+          active_rate: activeRateNum,
           revenue: parseFloat(rev) || 0
         };
 
