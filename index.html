@@ -264,16 +264,65 @@
 </div>
 
 <script>
+// ========== 数据迁移和修复 ==========
+function migrateAndFixData() {
+  let data = JSON.parse(localStorage.getItem('weeklyMetrics')) || [];
+  
+  // 如果没有数据，使用默认示例数据
+  if (data.length === 0) {
+    return [
+      { date: '12月2日-12月8日', registrations: 1152, successes: 500, conversion_rate: 43.4, deposits: 300, deposit_rate: 60.0, active_users: 250, active_rate: 50.0, revenue: 15000 },
+      { date: '12月9日-12月15日', registrations: 1082, successes: 480, conversion_rate: 44.4, deposits: 280, deposit_rate: 58.3, active_users: 240, active_rate: 50.0, revenue: 14500 },
+      { date: '12月16日-12月22日', registrations: 1341, successes: 600, conversion_rate: 44.7, deposits: 350, deposit_rate: 58.3, active_users: 300, active_rate: 50.0, revenue: 18000 },
+      { date: '12月23日-12月29日', registrations: 2208, successes: 950, conversion_rate: 43.0, deposits: 550, deposit_rate: 57.9, active_users: 480, active_rate: 50.5, revenue: 28000 },
+      { date: '12月30日-1月5日', registrations: 1675, successes: 720, conversion_rate: 43.0, deposits: 420, deposit_rate: 58.3, active_users: 360, active_rate: 50.0, revenue: 21000 },
+      { date: '1月6日-1月12日', registrations: 3614, successes: 1550, conversion_rate: 42.9, deposits: 900, deposit_rate: 58.1, active_users: 780, active_rate: 50.3, revenue: 46500 },
+      { date: '1月13日-1月19日', registrations: 3063, successes: 1320, conversion_rate: 43.1, deposits: 770, deposit_rate: 58.3, active_users: 660, active_rate: 50.0, revenue: 39600 }
+    ];
+  }
+  
+  // 修复现有数据：重新计算所有百分比（防止0%或错误值）
+  let fixed = false;
+  data = data.map(record => {
+    const reg = parseFloat(record.registrations) || 0;
+    const succ = parseFloat(record.successes) || 0;
+    const dep = parseFloat(record.deposits) || 0;
+    const active = parseFloat(record.active_users) || 0;
+    
+    // 重新计算转化率
+    const newConvRate = reg > 0 ? parseFloat(((succ / reg) * 100).toFixed(1)) : 0;
+    const newDepRate = succ > 0 ? parseFloat(((dep / succ) * 100).toFixed(1)) : 0;
+    const newActiveRate = succ > 0 ? parseFloat(((active / succ) * 100).toFixed(1)) : 0;
+    
+    // 如果发现数据不对，标记需要修复
+    if (record.conversion_rate === 0 || record.deposit_rate === 0 || record.active_rate === 0) {
+      fixed = true;
+    }
+    
+    return {
+      date: record.date,
+      registrations: reg,
+      successes: succ,
+      conversion_rate: newConvRate,
+      deposits: dep,
+      deposit_rate: newDepRate,
+      active_users: active,
+      active_rate: newActiveRate,
+      revenue: parseFloat(record.revenue) || 0
+    };
+  });
+  
+  // 如果修复了数据，保存回 localStorage
+  if (fixed) {
+    localStorage.setItem('weeklyMetrics', JSON.stringify(data));
+    console.log('✅ 数据已自动修复：重新计算了所有转化率');
+  }
+  
+  return data;
+}
+
 // ========== 数据与状态 ==========
-let rawData = JSON.parse(localStorage.getItem('weeklyMetrics')) || [
-  { date: '12月2日-12月8日', registrations: 1152, successes: 500, conversion_rate: 43.4, deposits: 300, deposit_rate: 60.0, active_users: 250, active_rate: 50.0, revenue: 15000 },
-  { date: '12月9日-12月15日', registrations: 1082, successes: 480, conversion_rate: 44.4, deposits: 280, deposit_rate: 58.3, active_users: 240, active_rate: 50.0, revenue: 14500 },
-  { date: '12月16日-12月22日', registrations: 1341, successes: 600, conversion_rate: 44.7, deposits: 350, deposit_rate: 58.3, active_users: 300, active_rate: 50.0, revenue: 18000 },
-  { date: '12月23日-12月29日', registrations: 2208, successes: 950, conversion_rate: 43.0, deposits: 550, deposit_rate: 57.9, active_users: 480, active_rate: 50.5, revenue: 28000 },
-  { date: '12月30日-1月5日', registrations: 1675, successes: 720, conversion_rate: 43.0, deposits: 420, deposit_rate: 58.3, active_users: 360, active_rate: 50.0, revenue: 21000 },
-  { date: '1月6日-1月12日', registrations: 3614, successes: 1550, conversion_rate: 42.9, deposits: 900, deposit_rate: 58.1, active_users: 780, active_rate: 50.3, revenue: 46500 },
-  { date: '1月13日-1月19日', registrations: 3063, successes: 1320, conversion_rate: 43.1, deposits: 770, deposit_rate: 58.3, active_users: 660, active_rate: 50.0, revenue: 39600 }
-];
+let rawData = migrateAndFixData();
 
 let editingIndex = null;
 let isAdmin = false;
