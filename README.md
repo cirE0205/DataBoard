@@ -95,7 +95,7 @@ Weekly Business Performance Dashboard - 专为周度汇报会议设计的数据�
 ## 🔧 技术栈
 
 - **前端框架**: 纯 HTML/CSS/JavaScript (无需 Node.js 或构建工具)
-- **图表库**: Apache ECharts 5.x (CDN 引入)
+- **图表库**: Apache ECharts 5.x (本地引入，无需网络)
 - **数据存储**: localStorage (浏览器本地)
 - **部署**: GitHub Pages (静态托管)
 
@@ -104,8 +104,8 @@ Weekly Business Performance Dashboard - 专为周度汇报会议设计的数据�
 ### Q: 数据会丢失吗？
 A: 数据保存在浏览器 localStorage 中，清除浏览器缓存会丢失。建议定期使用"导出数据"功能备份。
 
-### Q: 图表显示"ECharts 未加载"？
-A: 检查网络连接，确保可以访问 CDN。也可下载 echarts.min.js 到本地并修改引用路径。
+### Q: 需要网络连接吗？
+A: 不需要！ECharts 图表库已本地化，完全离线可用。只有 GitHub Pages 部署时需要网络。
 
 ### Q: 可以多人协作吗？
 A: 当前版本为单机版（localStorage）。如需多人协作，建议：
@@ -120,6 +120,10 @@ copy(localStorage.getItem('weeklyMetrics'))
 然后粘贴保存到文本文件。
 
 ## 📝 更新日志
+
+### v1.2.0 (2026-01-20)
+- ✅ **离线支持**: ECharts 库本地化，无需网络连接即可使用
+- ✅ **可靠性提升**: 消除 CDN 依赖，适应任何网络环境
 
 ### v1.1.0 (2026-01-20)
 - ✅ **重大更新**: 更新为8个业务指标（注册量、开户成功数、开户转化率、入金数、入金率、有效户数、有效户率、创收）
